@@ -23,6 +23,7 @@ IMAGE=$2
 
 KUBE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 source "${KUBE_ROOT}/hack/lib/util.sh"
+source "${KUBE_ROOT}/hack/lib/logging.sh"
 
 # Mapping of go ARCH to actual architectures shipped part of multiarch/qemu-user-static project
 declare -A QEMUARCHS=( ["amd64"]="x86_64" ["arm"]="arm" ["arm64"]="aarch64" ["ppc64le"]="ppc64le" ["s390x"]="s390x" )

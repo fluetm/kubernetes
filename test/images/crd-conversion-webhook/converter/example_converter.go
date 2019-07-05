@@ -18,6 +18,7 @@ package converter
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"k8s.io/klog"
@@ -32,6 +33,8 @@ func convertExampleCRD(Object *unstructured.Unstructured, toVersion string) (*un
 	convertedObject := Object.DeepCopy()
 	fromVersion := Object.GetAPIVersion()
 
+	log.Printf("MJF -> converting from %s to %s", fromVersion, toVersion)
+
 	if toVersion == fromVersion {
 		return nil, statusErrorWithMessage("conversion from a version to itself should not call the webhook: %s", toVersion)
 	}
@@ -40,6 +43,7 @@ func convertExampleCRD(Object *unstructured.Unstructured, toVersion string) (*un
 	case "stable.example.com/v1":
 		switch toVersion {
 		case "stable.example.com/v2":
+			log.Printf("%s: %v", fromVersion, convertedObject)
 			hostPort, ok := convertedObject.Object["hostPort"]
 			if ok {
 				delete(convertedObject.Object, "hostPort")
@@ -50,12 +54,14 @@ func convertExampleCRD(Object *unstructured.Unstructured, toVersion string) (*un
 				convertedObject.Object["host"] = parts[0]
 				convertedObject.Object["port"] = parts[1]
 			}
+			log.Printf("%s: %v", toVersion, convertedObject)
 		default:
 			return nil, statusErrorWithMessage("unexpected conversion version %q", toVersion)
 		}
 	case "stable.example.com/v2":
 		switch toVersion {
 		case "stable.example.com/v1":
+			log.Printf("%s: %v", fromVersion, convertedObject)
 			host, hasHost := convertedObject.Object["host"]
 			port, hasPort := convertedObject.Object["port"]
 			if hasHost || hasPort {
@@ -69,6 +75,7 @@ func convertExampleCRD(Object *unstructured.Unstructured, toVersion string) (*un
 				delete(convertedObject.Object, "host")
 				delete(convertedObject.Object, "port")
 			}
+			log.Printf("%s: %v", toVersion, convertedObject)
 		default:
 			return nil, statusErrorWithMessage("unexpected conversion version %q", toVersion)
 		}
